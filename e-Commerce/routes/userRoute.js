@@ -4,8 +4,8 @@ import  {createUser, loginUser, getUser, completeKyc} from "../controllers/user.
 
 const route = express.Router();
 
-route.post("/auth", createUser);
-route.post("/login", authenticateToken, authorizeKYC, loginUser);
+route.post("/signup", createUser);
+route.post("/login", loginUser);
 route.get("/allUsers", authenticateToken, getUser)
 
 export default route

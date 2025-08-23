@@ -1,139 +1,129 @@
-import productModel from '../models/productModel.js';
-import adminModel from '../models/adminModel.js';
-import cloudinary from 'cloudinary'
-import streamifier from 'streamifier'
+import productModel from '../models/product.model.js';
+import adminModel from '../models/admin.model.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
-// Configure Cloudinary
-cloudinary.v2.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
-// Helper to upload buffer to Cloudinary
-const uploadToCloudinary = (buffer) => {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.v2.uploader.upload_stream({ folder: 'products' }, (err, result) => {
-      if (err) return reject(err);
-      resolve(result.secure_url);
-    });
-    streamifier.createReadStream(buffer).pipe(stream);
-  });
-};
-
-// Create a new product
+// ================= Create Product =================
 export const createProducts = async (req, res) => {
-  const { productName, desc, features, materials, sizes, price } = req.body;
+  const { productName, desc, price, materials, features, categories, sizes } = req.body;
+  const { _id, admin } = req.user;
   const files = req.files;
-  const {_id, admin} = req.user;
 
-   if (_id == product.admin && admin) {
-    return res.send("post created successfully");
-    } 
-
-  if (!productName || !desc || !price || !materials || !features || !sizes ) {
+  if (!productName || !desc || !price || !materials || !features || !categories || !sizes) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
-  if (!req.files || req.files.length < 3) {
-    return res.status(400).json({ message: 'At least three images are required' });
+  if (!files?.previewPix || !files?.image1 || !files?.image2) {
+    return res.status(400).json({ message: 'Preview, image1, and image2 are required' });
   }
 
-//   try {
-//     const imageUrls = await Promise.all(
-//       req.files.map(file => uploadToCloudinary(file.buffer))
-//     );
+  try {
+    // Upload images
+    const previewPixResponse = await uploadToCloudinary(files["previewPix"][0].buffer);
+    const image1Response = await uploadToCloudinary(files["image1"][0].buffer);
+    const image2Response = await uploadToCloudinary(files["image2"][0].buffer);
 
-    const previewPixResponse = await streamUpload(files["previewPix"][0].buffer, "images");
-    const image1Response = await streamUpload(files["image1"][0].buffer, "images");
-    const image2Response = await streamUpload(files["image2"][0].buffer, "images");
-  
-
+    // Create product
     const newProduct = new productModel({
-      user: id,
+      admin: _id,
+      previewPix: {
+        publicId: previewPixResponse.public_id,
+        size: previewPixResponse.bytes,
+        url: previewPixResponse.secure_url
+      },
+      Img1: [
+        { publicId: image1Response.public_id, 
+          size: image1Response.bytes, 
+          url: image1Response.secure_url 
+        }
+      ],
+      Img2: [
+        { publicId: image2Response.public_id, 
+          size: image2Response.bytes, 
+          url: image2Response.secure_url 
+        }
+      ],
       productName,
       desc,
-      features,
-      materials,
-      sizes,
       price,
-      pictures: imageUrls
+      materials,
+      features,
+      categories,
+      sizes
     });
 
     const savedProduct = await newProduct.save();
-    // return res.status(201).json(savedProduct);
-    await userModel.findByIdAndUpdate (
-    id, 
-    { $push: { products: savedProduct.id }}, 
-    { new: true }
-  );
-return res.send("post created successfuly!!!");
+
+    // Optionally link to admin
+    await adminModel.findByIdAndUpdate(
+      _id,
+      { $push: { products: savedProduct._id } },
+      { new: true }
+    );
+
+    return res.status(201).json({ message: "Product created successfully", product: savedProduct });
+
   } catch (error) {
-    console.log(error.message);
+    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
 
-// Get all products
+// ================= Get Products =================
 export const getProducts = async (req, res) => {
-     const {adminId} = req.query
-    try {
-      const products = await productModel.find({admin:adminId});
-      return res.json(products);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      return res.send( 'Something went wrong' );
-    }
+  const { adminId } = req.query;
+  try {
+    const products = await productModel.find({ admin: adminId });
+    return res.json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return res.status(500).json({ message: 'Something went wrong' });
+  }
 };
 
-// Update an existing product
-export const updateProducts = async(req, res) => {
-  const { productId, userId } = req.body;
+// ================= Update Product =================
+export const updateProducts = async (req, res) => {
+  const { productId } = req.body;
+  const { _id, admin } = req.user;
   const body = req.body;
 
-  const product = await productModel.findById(productId);
-    if(!product){
-      return res.send("product does not exist")
-    }
-    //check if the owner
-    if(userId != product.admin){
-      res.send("products does not belong to you. You cannot update this products")
+  try {
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product does not exist" });
     }
 
-    if (_id != post.admin && !admin) {
-      return res.send("Unable to delete. You are not the owner");
-    } 
-
-    try {
-      await productModel.findByIdAndUpdate(productId, {...body}, {new: true});  
-      res.send("product updated successfully")
-    } catch (error) {
-      return res.send("something went wrong")
+    if (String(product.admin) !== String(_id) && !admin) {
+      return res.status(403).json({ message: "You are not authorized to update this product" });
     }
+
+    const updatedProduct = await productModel.findByIdAndUpdate(productId, { ...body }, { new: true });
+    return res.json({ message: "Product updated successfully", product: updatedProduct });
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
 
-// Delete a product
+// ================= Delete Product =================
 export const deleteProducts = async (req, res) => {
-    const {productId} = req.query;
-    const {id, admin} = req.user;
+  const { productId } = req.query;
+  const { _id, admin } = req.user;
 
- //check for product existence
+  try {
     const product = await productModel.findById(productId);
-      if(!product){
-        return res.send("product does not exist")
-      }
-      console.log(admin);
-      console.log(product.admin);
-  //check if its the admin deleting product
-    if (id != product.admin && !admin) {
-      return res.send("Unable to delete this product. you are not the owner");
+    if (!product) {
+      return res.status(404).json({ message: "Product does not exist" });
     }
 
-   try {
-      await productModel.findByIdAndDelete(productId)
-      return res.send("product deleted successfully!!!") 
-           
-    } catch (error) {
-      return res.send(error.message)
+    if (String(product.admin) !== String(_id) && !admin) {
+      return res.status(403).json({ message: "You are not authorized to delete this product" });
     }
-  };
+
+    await productModel.findByIdAndDelete(productId);
+    return res.json({ message: "Product deleted successfully" });
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};

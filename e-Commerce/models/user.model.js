@@ -15,18 +15,17 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     
-    kyc: { type: mongoose.Types.ObjectId, ref: "Kyc" },
-    product: { type: mongoose.Types.ObjectId, ref: "Product" },
-    checkout: { type: mongoose.Types.ObjectId, ref: "Checkout" },
-    payment: { type: mongoose.Types.ObjectId, ref: "Payment" },
-    cart: { type: mongoose.Types.ObjectId, ref: "Cart" },
+    kyc: { type: mongoose.Types.ObjectId, ref: "kyc" },
+    product: { type: mongoose.Types.ObjectId, ref: "product" },
+    checkout: { type: mongoose.Types.ObjectId, ref: "checkout" },
+    payment: { type: mongoose.Types.ObjectId, ref: "payment" },
+    cart: { type: mongoose.Types.ObjectId, ref: "cart" },
 
     admin: { 
         type: Boolean, 
         default: false 
     },
-},
- {timestamps: true}
+}, {timestamps: true}
 );
 
 //mongoose middleware 
@@ -40,7 +39,7 @@ userSchema.pre("validate", function(next) {
     next();
 });
 
-userSchema.post("save", function (doc, next) {
+userSchema.post("save", function(doc, next) {
     console.log(doc);
     console.log("A verification email has been sent to your email");
     next();

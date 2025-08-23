@@ -1,11 +1,13 @@
 import adminModel from '../models/admin.model.js';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { streamUpload } from "../utils/streamUpload.js"
 
 // create a admin
 export const createAdmin = async (req, res ) => {
-    const { email, password, ...others } = req.body;
+    const { name, email, password } = req.body;
 
-    if (!email || !password || !others) {
+    if (!name || !email || !password) {
         return res.status(400).json({message: "invalid credentials"})
     
     //Create a new Admin
@@ -16,21 +18,21 @@ export const createAdmin = async (req, res ) => {
         };
 
             const newAdmin = new adminModel({
+                name,
                 email,
                 password,
-                ...others,
+                admin: true
             });
 
         // Save the admin to the database
             const savedAdmin = await newAdmin.save();
             res.status(201).json(savedAdmin);
-        } catch (error) {
-            console.error("Error creating admin:", error);
-            return res.status(500).json({message:"something went wrong"});
+    } catch (error) {
+        console.error("Error creating admin:", error);
+        return res.status(500).json({message:"something went wrong"});
         }
     }
 };
-
 
 //login admin
 export const loginAdmin = async (req, res ) => {
@@ -77,8 +79,6 @@ export const updateAdmin = async (req, res) => {
     }
 };
 
-
-
 export const deleteAdmin = async (req, res) => {
     const { _id } = req.query;
     try {
@@ -90,3 +90,21 @@ export const deleteAdmin = async (req, res) => {
         return res.status(500).json({ error: "Cannot delete Admin" });
     } 
 };
+
+//upload an array of files
+export const arrayUpload = async (req, res, next) => {
+    try {
+        if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+        }
+
+        const uploads = await Promise.all(
+            req.files.map((file) => streamUpload(file.buffer, "images"))
+        );
+
+        req.uploads = uploads;
+        next()
+    } catch (error) {
+        next(error)
+    }
+}

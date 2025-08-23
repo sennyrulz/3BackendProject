@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import userModel from '../models/user.model.js';
 import kycModel from '../models/kyc.model.js';
+import bcrypt from 'bcryptjs';
 
 // create a user
 export const createUser = async (req, res ) => {
@@ -24,7 +25,8 @@ export const createUser = async (req, res ) => {
 
             // Save the user to the database
             const savedUser = await newUser.save();
-            res.status(201).json(savedUser);
+            const {password, ...userData} = savedUser._doc;
+            res.status(201).json(userData);
         } catch (error) {
             console.error("Error creating user:", error);
             return res.status(500).json({message:"something went wrong"});
@@ -34,44 +36,61 @@ export const createUser = async (req, res ) => {
 
 //login a user
 export const loginUser = async (req, res ) => {
+
+    try{
     const {email, password } = req.body;
 
     const user = await userModel.findOne({ email });
+
     if(!user) {
         return res.status(404).json({ error: "This account does not exist, create an account!"});
     };
     //compare password
-    const isValid = bcrypt.compareSync(password, user.password);
-    if(!isValid) {
+    const isMatch = bcrypt.compare(password, user.password);
+    if(!isMatch) {
         return res.status(401).json({error: "Invalid password"});
         };
 
     //create a token
     const token = jwt.sign(
-        { id:user._id, admin:user.admin },
+        { id:user._id},
         process.env.JWT_SECRET,
-        { expiresIn:"1h" }
+        { expiresIn:"1d" } //1day
     );
 
     res.cookie ("token", token, {
         httpOnly: true,
-        maxAge: 1000 * 60 * 60,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax"
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60 *1000 // 1day
     });
-    return res.status(200).json({ message: "Login successful"});
+
+    return res.status(200).json({ 
+        message: "Login successful",
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email
+        }
+    });
+        } catch (err) {
+            console.error("Login Error:", err.message);
+            res.status(500).json({ message: "Server error" });
+        }
     };
 
 //get all users
 export const getAllUsers = async (req, res) => {
    try {
      const allUsers = await userModel
-    .find()
-    .populate("Kyc")
-    .populate("Checkout")
-    .populate("Payment")
-    .populate("Order")
-    .populate("Cart")
+    .find().select("-password")
+    .populate("kyc")
+    .populate("checkout")
+    .populate("payment")
+    .populate("cart")
+
+    return res.json(allUsers)
+
    } catch (error) {
         return res.json({message: "error getting users"});
    }
@@ -83,11 +102,10 @@ export const getUser = async (req, res) => {
 
     const User = await userModel
     .findById(_id)
-    .populate("Kyc")
-    .populate("Checkout")
-    .populate("Payment")
-    .populate("Order")
-    .populate("Cart")
+    .populate("kyc")
+    .populate("checkout")
+    .populate("payment")
+    .populate("cart")
 
     return res.json(User);
 };

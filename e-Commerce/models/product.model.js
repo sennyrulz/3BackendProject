@@ -28,13 +28,24 @@ const productSchema = new mongoose.Schema({
 
     features: [String],
 
+    categrory: {
+        type: String,
+        enum: ["Clothing", "Accessories", "Footwear", "Electronics", "Home Appliances"],
+        required: true
+    },
+
     sizes: {
         String,
         enum: ["S", "M", "L", "XL", "2XL", "3XL", "4XL"]
     },
 
-    Img1: [imageSchema],
+    previewPix: {
+        publicId: String,
+        size: Number
+    },
+    
     Img2: [imageSchema],
+    Img3: [imageSchema],
 
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     admin: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
