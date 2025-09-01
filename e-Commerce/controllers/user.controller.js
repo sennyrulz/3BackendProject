@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import userModel from '../models/user.model.js';
-import kycModel from '../models/kyc.model.js';
+import User from '../models/user.model.js';
+import Kyc from '../models/kyc.model.js';
 import bcrypt from 'bcryptjs';
 
 // create a user
@@ -10,14 +10,14 @@ export const createUser = async (req, res ) => {
     if (!email || !password) {
         return res.json({message: "invalid credentials"})
     }
-        const isUser = await userModel.findOne({email});
+        const isUser = await User.findOne({email});
         if(isUser) {
             return res.status(400).json({message:"User already exist. Please log in"})
         };
 
         //Create a new user
         try {
-            const newUser = new userModel({
+            const newUser = new User({
                 email,
                 password,
                 ...others,
@@ -33,20 +33,20 @@ export const createUser = async (req, res ) => {
         }
 };
 
-
 //login a user
 export const loginUser = async (req, res ) => {
 
     try{
     const {email, password } = req.body;
 
-    const user = await userModel.findOne({ email });
+    const user = await User.findOne({ email });
 
     if(!user) {
         return res.status(404).json({ error: "This account does not exist, create an account!"});
     };
+    
     //compare password
-    const isMatch = bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch) {
         return res.status(401).json({error: "Invalid password"});
         };
@@ -69,7 +69,7 @@ export const loginUser = async (req, res ) => {
         message: "Login successful",
         user: {
             id: user._id,
-            name: user.name,
+            name: user.fullName,
             email: user.email
         }
     });
@@ -82,7 +82,7 @@ export const loginUser = async (req, res ) => {
 //get all users
 export const getAllUsers = async (req, res) => {
    try {
-     const allUsers = await userModel
+     const allUsers = await User
     .find().select("-password")
     .populate("kyc")
     .populate("checkout")
@@ -100,7 +100,7 @@ export const getAllUsers = async (req, res) => {
 export const getUser = async (req, res) => {
     const {_id} = req.user;
 
-    const User = await userModel
+    const User = await User
     .findById(_id)
     .populate("kyc")
     .populate("checkout")
@@ -118,14 +118,14 @@ export const completeKyc = async (req, res) => {
     
     // Check if KYC already exists for user
     try {
-    const existingKyc = await kycModel.findOne({ user: _id });
+    const existingKyc = await Kyc.findOne({ user: _id });
     
     if (existingKyc) {
       return res.status(400).json({ message: "KYC already completed, Please Login" });
     }
 
     // Create new KYC
-    const newKyc = new kycModel({
+    const newKyc = new Kyc({
         phone, 
         documentType, 
         idNumber, 
@@ -137,7 +137,7 @@ export const completeKyc = async (req, res) => {
     const savedKyc = await newKyc.save();
 
     // Optionally update user with kyc reference
-    await userModel.findByIdAndUpdate(_id, { kyc: savedKyc._id });
+    await User.findByIdAndUpdate(_id, { kyc: savedKyc._id });
 
     return res.status(201).json({ message: "KYC completed successfully", kyc: savedKyc });
   } catch (error) {
@@ -149,7 +149,7 @@ export const completeKyc = async (req, res) => {
 export const updateUser = async (req, res) => {
     const { _id, ...others } = req.body;
     try {
-    const updatedUser = await userModel.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
         _id,
         { ...others },
         { new: true }
@@ -160,12 +160,10 @@ export const updateUser = async (req, res) => {
     }
 };
 
-
-
 export const deleteUser = async (req, res) => {
     const { _id } = req.query;
     try {
-        const deletedUser = await userModel.findByIdAndDelete
+        const deletedUser = await User.findByIdAndDelete
         (_id);
         return res.json(deletedUser);
     } catch (error) {
@@ -173,3 +171,13 @@ export const deleteUser = async (req, res) => {
         return res.status(500).json({ error: "Cannot delete User" });
     } 
 };
+
+export const errorPage = async (req, res, next) => {
+    if (!login, !signup) {
+        return res.status(404)({message: "This page does not exist"})
+    }
+    if(!user) {
+        return res.status(404).json({ error: "This account does not exist, create an account!"});
+    };
+};
+

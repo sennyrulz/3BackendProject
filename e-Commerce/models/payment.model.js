@@ -6,32 +6,33 @@ const paymentSchema = new mongoose.Schema({
     required: true, 
     unique: true 
   },
-
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    checkout: { type: mongoose.Schema.Types.ObjectId, ref: 'Checkout' },
     
-    totalAmount: { 
-        type: Number, 
-        required: true 
-    },
+  totalAmount: { 
+    type: Number, 
+    required: true 
+  },
 
-    paymentMethod: { 
-        type: String, 
-        default: 'paystack' 
-    }, // Default to 'paystack'
+  paymentMethod: { 
+    type: String, 
+    default: 'paystack' 
+  }, // Default to 'paystack'
     
-    currency: { type: String, default: 'USD' }, // Default to Nigerian USD
+  currency: { type: String, default: 'USD' }, // Default to Nigerian USD
     
-    transactionId: { type: String, unique: true },
+  transactionId: { type: String, unique: true },
 
-    status: { 
-        type: String, 
-        enum: ["pending", "success", "failed"], 
-        default: "pending" 
-    }, // Default to 'pending'
+  status: { 
+    type: String, 
+    enum: ["pending", "success", "failed"], 
+    default: "pending" 
+  }, // Default to 'pending'
 
-    paidAt: { type: Date },
-    }, { timestamps: true });
+  paidAt: { type: Date },
+
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  checkout: { type: mongoose.Schema.Types.ObjectId, ref: 'Checkout' },
+
+}, { timestamps: true });
 
 const Payment = mongoose.model("Payment", paymentSchema);
 export default Payment;

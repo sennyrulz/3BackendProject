@@ -39,5 +39,5 @@ adminSchema.post("save", function (doc, next) {
     next();
 });
 
-const adminModel = mongoose.model("Admin", adminSchema);
-export default adminModel
+const Admin = mongoose.model("Admin", adminSchema);
+export default Admin

@@ -1,24 +1,24 @@
-import adminModel from '../models/admin.model.js';
+import Admin from '../models/admin.model.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { streamUpload } from "../utils/streamUpload.js"
 
 // create a admin
 export const createAdmin = async (req, res ) => {
-    const { name, email, password } = req.body;
+    const { fullName, email, password } = req.body;
 
-    if (!name || !email || !password) {
+    if (!fullName || !email || !password) {
         return res.status(400).json({message: "invalid credentials"})
     
     //Create a new Admin
     try {
-        const isAdmin = await adminModel.findOne({email});
+        const isAdmin = await Admin.findOne({email});
         if(isAdmin) {
             return res.status(400).json({message:"Admin already exist. Please log in"})
         };
 
-            const newAdmin = new adminModel({
-                name,
+            const newAdmin = new Admin({
+                fullName,
                 email,
                 password,
                 admin: true
@@ -38,7 +38,7 @@ export const createAdmin = async (req, res ) => {
 export const loginAdmin = async (req, res ) => {
     const {email, password } = req.body;
 
-    const admin = await adminModel.findOne({ email });
+    const admin = await Admin.findOne({ email });
     if(!admin) {
         return res.status(404).json({ error: "This account does not exist, create an account!"});
     };
@@ -68,7 +68,7 @@ export const loginAdmin = async (req, res ) => {
 export const updateAdmin = async (req, res) => {
     const { _id, ...others } = req.body;
     try {
-    const updatedAdmin = await adminModel.findByIdAndUpdate(
+    const updatedAdmin = await Admin.findByIdAndUpdate(
         _id,
         { ...others },
         { new: true }
@@ -82,7 +82,7 @@ export const updateAdmin = async (req, res) => {
 export const deleteAdmin = async (req, res) => {
     const { _id } = req.query;
     try {
-        const deletedAdmin = await adminModel.findByIdAndDelete
+        const deletedAdmin = await Admin.findByIdAndDelete
         (_id);
         return res.json(deletedAdmin);
     } catch (error) {

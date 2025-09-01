@@ -1,16 +1,18 @@
 import express from 'express';
 import { authenticateAdmin } from '../middlewares/admin.middleware.js';
-import { createAdmin, loginAdmin } from '../controllers/admin.controller.js';
-import { getAllUsers, getUser } from '../controllers/user.controller.js';
+import { createAdmin, loginAdmin, errorPage } from '../controllers/admin.controller.js';
 
 const route = express.Router();
 
-// Admin Dashboard
+// Auth
 route.post('/signup', createAdmin);
-route.post ('/login', authenticateAdmin,loginAdmin)
-route.get('/dashboard', authenticateAdmin, (req, res) => {
+route.post ('/login',loginAdmin)
+
+//Protected Route
+route.get('/:id/dashboard', authenticateAdmin, (req, res) => {
 res.status(200).json({ message: 'Welcome to the Admin Dashboard' })});
 
-route.get('users', getUser, getAllUsers)
+//Error
+route.get("/404", errorPage);
 
 export default route;

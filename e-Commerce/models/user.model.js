@@ -15,11 +15,11 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     
-    kyc: { type: mongoose.Types.ObjectId, ref: "kyc" },
-    product: { type: mongoose.Types.ObjectId, ref: "product" },
-    checkout: { type: mongoose.Types.ObjectId, ref: "checkout" },
-    payment: { type: mongoose.Types.ObjectId, ref: "payment" },
-    cart: { type: mongoose.Types.ObjectId, ref: "cart" },
+    kyc: { type: mongoose.Types.ObjectId, ref: "Kyc" },
+    product: { type: mongoose.Types.ObjectId, ref: "Product" },
+    checkout: { type: mongoose.Types.ObjectId, ref: "Checkout" },
+    payment: { type: mongoose.Types.ObjectId, ref: "Payment" },
+    cart: { type: mongoose.Types.ObjectId, ref: "Cart" },
 
     admin: { 
         type: Boolean, 
@@ -45,5 +45,5 @@ userSchema.post("save", function(doc, next) {
     next();
 });
 
-const userModel = mongoose.model("User", userSchema);
-export default userModel
+const User = mongoose.model("User", userSchema);
+export default User

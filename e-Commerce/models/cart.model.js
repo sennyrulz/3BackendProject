@@ -36,13 +36,17 @@ const cartItemSchema = new mongoose.Schema({
 
 const cartSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User"},
     items: [cartItemSchema],
     subtotal: { type: Number, default: 0 },
   },
+
   { timestamps: true }
 );
 
+
+
+//==========================================
 // Auto-update subtotal when saving
 cartSchema.pre("save", function (next) {
   this.subtotal = this.items.reduce(

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import productModel from "../models/product.model.js";
-import checkoutModel from "../models/checkout.model.js";
+import Product from "../models/product.model.js";
+import Checkout from "../models/checkout.model.js";
 
 export const processCheckout = async (req, res) => {
 const {products} = req.body;
@@ -13,7 +13,7 @@ const {products} = req.body;
     try {
         // Validate products
         const productIds = products.map(product => product.productId);
-        const validProducts = await productModel.find({ _id: { $in: productIds } });
+        const validProducts = await Product.find({ _id: { $in: productIds } });
 
         if (validProducts.length !== products.length) {
             return res.status(404).json({ message: "Some products not found" });
@@ -45,7 +45,7 @@ const {products} = req.body;
             user: _id
         };
 
-        const checkout = new checkoutModel(checkoutData);
+        const checkout = new Checkout(checkoutData);
         await checkout.save();
 
         return res.status(201).json({ 

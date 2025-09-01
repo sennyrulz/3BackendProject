@@ -49,8 +49,8 @@ const productSchema = new mongoose.Schema({
 
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     admin: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
+}, {timestamps: true}
+);
 
-});
-
-const productModel = mongoose.model("Product", productSchema)
-export default productModel;
+const Product = mongoose.model("Product", productSchema)
+export default Product;

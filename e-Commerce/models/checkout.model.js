@@ -80,9 +80,9 @@ const checkOutSchema = new mongoose.Schema({
   },
     // tax: { type: Number, default: 0 },
 
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
 }, { timestamps: true });
 
-const checkout = mongoose.model('Checkout', checkOutSchema);
-export default checkout;
+const Checkout = mongoose.model('Checkout', checkOutSchema);
+export default Checkout;

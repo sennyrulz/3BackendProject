@@ -1,5 +1,5 @@
-import productModel from '../models/product.model.js';
-import cartModel from '../models/cart.model.js'
+import Product from '../models/product.model.js';
+import Cart from '../models/cart.model.js'
 
 export const addToCart = async (req, res) => {
   try {
@@ -12,12 +12,12 @@ export const addToCart = async (req, res) => {
     }
 
     // Find the product that was already created (with images)
-    const product = await productModel.findById(_id);
+    const product = await Product.findById(_id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const cartItem = new cartModel({
+    const cartItem = new Cart({
       user: _id,
       product: _id,
       thumbail: product.previewPix.publicId,
@@ -45,7 +45,7 @@ export const getCart = async (req, res) => {
   try {
      const {_id} = req.user; // auth middleware sets req.user
 
-    const cart = await cartModel.findOne({user: _id })
+    const cart = await Cart.findOne({user: _id })
       .populate({
         path: "items.productId",
         select: "productName Img1 price", 

@@ -1,4 +1,4 @@
-import paymentModel from '../models/payment.model.js';
+import Payment from '../models/payment.model.js';
 import fetch from 'node-fetch';
 import { get_ip } from 'ipware';
 
@@ -40,7 +40,7 @@ export const createPayment = async (req, res) => {
         // }
 
         // Create payment
-        const newPayment = new paymentModel({
+        const newPayment = new Payment({
             reference,
             user,
             checkout,
@@ -65,7 +65,7 @@ export const getPayment = async (req, res) => {
             return res.status(400).json({ message: "Payment ID is required" });
         }
 
-        const payment = await paymentModel
+        const payment = await Payment
             .findById(req.params.id)
             .populate("checkout")
             .populate("order")
@@ -84,7 +84,7 @@ export const getPayment = async (req, res) => {
 
 export const getAllPayments = async (req, res) => {
     try {
-        const allPayments = await paymentModel
+        const allPayments = await Payment
             .find()
             .populate("checkout")
             .populate("order")

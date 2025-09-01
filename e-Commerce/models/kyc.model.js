@@ -83,7 +83,8 @@ const kycSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+}, {timestamps: true}
+);
 
-const kycModel = mongoose.model('Kyc', kycSchema);
-export default kycModel;
+const Kyc = mongoose.model('Kyc', kycSchema);
+export default Kyc;
