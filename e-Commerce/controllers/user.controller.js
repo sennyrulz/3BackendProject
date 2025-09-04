@@ -5,12 +5,12 @@ import bcrypt from 'bcryptjs';
 
 // create a user
 export const createUser = async (req, res ) => {
-    const { email, password, ...others } = req.body;
+    const { fullName, email, password } = req.body;
 
-    if (!email || !password) {
+    if (!fullName || !email || !password) {
         return res.json({message: "invalid credentials"})
     }
-        const isUser = await User.findOne({email});
+    const isUser = await User.findOne({email});
         if(isUser) {
             return res.status(400).json({message:"User already exist. Please log in"})
         };
@@ -18,18 +18,17 @@ export const createUser = async (req, res ) => {
         //Create a new user
         try {
             const newUser = new User({
+                fullName,
                 email,
                 password,
-                ...others,
             });
 
-            // Save the user to the database
-            const savedUser = await newUser.save();
-            const {password, ...userData} = savedUser._doc;
-            res.status(201).json(userData);
+// Save the user to the database
+    const savedUser = await newUser.save();
+        return res.json(savedUser);
         } catch (error) {
-            console.error("Error creating user:", error);
-            return res.status(500).json({message:"something went wrong"});
+            console.log(error.message);
+        return res.send("something went wrong");
         }
 };
 
@@ -53,7 +52,7 @@ export const loginUser = async (req, res ) => {
 
     //create a token
     const token = jwt.sign(
-        { id:user._id},
+        { id: user._id},
         process.env.JWT_SECRET,
         { expiresIn:"1d" } //1day
     );
@@ -100,7 +99,7 @@ export const getAllUsers = async (req, res) => {
 export const getUser = async (req, res) => {
     const {_id} = req.user;
 
-    const User = await User
+    const user = await User
     .findById(_id)
     .populate("kyc")
     .populate("checkout")
@@ -112,38 +111,41 @@ export const getUser = async (req, res) => {
 
 //complete KYC
 export const completeKyc = async (req, res) => {
-    const {_id} = req.user;
-
-    const { phone, documentType, idNumber, status, ...others } = req.body
-    
-    // Check if KYC already exists for user
     try {
-    const existingKyc = await Kyc.findOne({ user: _id });
-    
+        const {_id} = req.user;
+        const { phone, documentType, idNumber, status, ...others } = req.body
+        
+        // Check if KYC already exists for user
+        const existingKyc = await Kyc.findOne({ user: _id });
+
     if (existingKyc) {
-      return res.status(400).json({ message: "KYC already completed, Please Login" });
+      return res.status(400).json({ 
+        message: "KYC already completed, Please Login" });
     }
 
     // Create new KYC
     const newKyc = new Kyc({
+        user: _id,
         phone, 
         documentType, 
         idNumber, 
         status: status || 'pending', // Default to 'pending' if not provided
         ...others,
-        user: _id,
     });
 
     const savedKyc = await newKyc.save();
 
-    // Optionally update user with kyc reference
+    // Link KYC back to User
     await User.findByIdAndUpdate(_id, { kyc: savedKyc._id });
 
-    return res.status(201).json({ message: "KYC completed successfully", kyc: savedKyc });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Something went wrong" });
-  }
+    return res.status(201).json({ 
+        message: "KYC completed successfully", 
+        kyc: savedKyc });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Something went wrong" });
+    }
 };
 
 export const updateUser = async (req, res) => {
@@ -173,11 +175,9 @@ export const deleteUser = async (req, res) => {
 };
 
 export const errorPage = async (req, res, next) => {
-    if (!login, !signup) {
-        return res.status(404)({message: "This page does not exist"})
-    }
-    if(!user) {
-        return res.status(404).json({ error: "This account does not exist, create an account!"});
-    };
+  return res.status(404).json({
+    success: false,
+    message: "The requested resource does not exist",
+  });
 };
 

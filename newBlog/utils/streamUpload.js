@@ -1,7 +1,7 @@
 import streamifier from 'streamifier'
-import cloudinary from '../utils/cloudinary'
+import cloudinary from '../utils/cloudinary.js'
 
-export const streamUpload = async (res, req) => {
+export const streamUpload = (buffer, folder = "posts") => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       { folder, resource_type: "auto"}, 
@@ -12,4 +12,4 @@ export const streamUpload = async (res, req) => {
     );
     streamifier.createReadStream(buffer).pipe(stream);
   });
-}
+};

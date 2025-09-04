@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(cors({
-    origin: ["http://localhost:5007", "https://backend-axia-8-Blog.onrender.com", "https://axia-8-Blog.onrender.com"],
+    origin: ["http://localhost:5007", "http://localhost:3000", "https://blog-project-frontend.vercel.app"],
     credentials: true,
   })
 );

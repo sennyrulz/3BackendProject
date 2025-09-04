@@ -108,3 +108,11 @@ export const arrayUpload = async (req, res, next) => {
         next(error)
     }
 }
+
+//========error Page========//
+export const errorPage = async (req, res, next) => {
+    if (!createAdmin, !updateAdmin, !deleteAdmin, !loginAdmin, !arrayUpload) {
+      return res.status(404)({message: "This page does not exist"})
+    }
+    next();
+};

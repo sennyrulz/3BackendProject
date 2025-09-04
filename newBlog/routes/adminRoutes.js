@@ -1,17 +1,14 @@
 import express from "express"
 import { authenticateToken } from "../middlewares/auth.middlewares.js";
 import {
-    createAdmin, 
-    adminLogin, 
-    getAdmin, 
-    updateAdmin,
-    deleteAdmin, 
-    errorPage} 
-    from "../controllers/admin.controllers.js"
+    createAdmin, adminLogin, 
+    getAdmin, updateAdmin,
+    deleteAdmin, errorPage
+    } from "../controllers/admin.controllers.js"
 
 const route = express.Router();
 
-//Auth
+//Authentication
 route.post("/signup", createAdmin);
 route.post("/login", adminLogin);
 

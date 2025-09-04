@@ -1,12 +1,9 @@
 import express from 'express'
 import {authenticateToken} from "../middlewares/auth.middlewares.js";
 import { 
-    createUser, 
-    loginUser, 
-    getUser, 
-    updateUser, 
-    deleteUser, 
-    errorPage
+    createUser, loginUser, 
+    getUser, updateUser, 
+    deleteUser, errorPage
 } from '../../e-Commerce/controllers/user.controller.js';
 
 const route = express.Router();

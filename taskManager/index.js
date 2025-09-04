@@ -30,7 +30,7 @@ app.use(urlencoded)({ extended: true });
 app.use(cookieParser());
 
 app.use(cors({
-  origin: ["http://localhost:5009", "https://backend-axia-8.onrender.com/"],
+  origin: ["http://localhost:5009", "https://backend-taskManager.onrender.com/"],
   credentials: true
 }));
 

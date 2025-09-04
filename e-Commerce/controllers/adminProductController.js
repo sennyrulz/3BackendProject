@@ -131,3 +131,11 @@ export const deleteProducts = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+// ================= Error Page =================
+export const errorPage = async (req, res, next) => {
+  if (!createProducts, !getProducts, !updateProducts, !deleteProducts) {
+    return res.status(404)({message: "This page does not exist"})
+  }
+  next();
+};

@@ -80,52 +80,67 @@ export const createPost = async (req, res) => {
 
 //======================== Get Posts ==============================
 export const getPost = async (req,res) => {
-    const {_id} = req.query;
-     if(!admin || !user) {
-    return res.json({message: "You are not authorised for this operation"})
-  }
+    const {_id, admin, user} = req.query;
+        if(!admin || !user) {
+        return res.json({message: "You are not authorised for this operation"})
+    }
 
   try {
-    const posts = await Post.find({admin:_id})
+        const posts = await Post.find({$or: [{ admin: _id }, { user: _id }]})
         return res.json(posts);
-
-  } catch (error) {
+    } catch (error) {
     console.error("Error fetching posts:", error);
     return res.status(500).json({ message: 'Something went wrong' });
   }
 };
 
 export const updatePost = async (req, res) => {
-    const {_id, ...others} = req.body;
+    const {postId, userId} = req.body;
+    const body = req.body;
+    
+    const post = await Post.findById(postId);
+        if(!post){
+            return res.send("post does not exist")
+        }
+        //check if the owner
+        if ((userId != post.user) || (userId != post.admin)) {
+            res.send("post does not belong to you. You cannot update this post")
+        }
+
+  
     try {
-        const updatedPost = await Post.findByIdAndUpdate(
-            _id,
-            {...others},
-            {new: true}
-        );
-            return res.json(updatedPost);
+        await Post.findByIdAndUpdate(postId, {...body}, {new: true});
+        res.send("post updated successfully")
     } catch (error) {
         return res.json({message: "error uploading post"})
     }
 }
 
 export const deletePost = async (req, res) => {
-    const {_id} = req.query;
+    const {postId} = req.query;
+    const {_id, admin, user} = req.user;
+
+    const post = await Post.findById(postId);
+        if(!post){
+            return res.send("post does not exist")
+        };
+        //check if the owner
+        if ((user != post.user) || (admin != post.admin)) {
+            res.send("post does not belong to you. You cannot delete this post")
+        };
     try {
-        const deletedPost = await Post.findByIdAndDelete
-        (_id);
-        return res.json(deletedPost);
+        await Post.findByIdAndDelete(postId);
+        return res.json({message: "Post deleted successfully"});
     } catch (error) {
-     console.error("Delete error:", error);
         return res.status(500).json({ error: "Cannot delete Post" });
     }
 };
 
+//======================== Error Page ==============================
 export const errorPage = async (req, res, next) => {
     if (!createPost, !getPost) {
         return res.status(404)({message: "This page does not exist"})
+
     }
-    if(!user) {
-        return res.status(404).json({ error: "This account does not exist, create an account!"});
-    };
-}
+    next();
+};

@@ -57,5 +57,12 @@ const {products} = req.body;
         console.error("Checkout processing error:", error);
         return res.status(500).json({ message: "Internal server error", error: error.message });
     }   
-
 }
+
+//========error page========//
+export const errorPage = async (req, res, next) => {
+    if (!processCheckout) {
+      return res.status(404)({message: "This page does not exist"})
+    }
+    next();
+};

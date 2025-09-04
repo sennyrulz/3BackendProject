@@ -131,11 +131,9 @@ export const deleteAdmin = async (req, res) => {
 };
 
 export const errorPage = async (req, res, next) => {
-    if (!login, !signup) {
-        return res.status(404)({message: "This page does not exist"})
+    if (!createAdmin, !getAdmin, !updateAdmin, !deleteAdmin, !loginAdmin, !getAllAdmin) {
+      return res.status(404)({message: "This page does not exist"})
     }
-    if(!admin) {
-        return res.status(404).json({ error: "This account does not exist, create an account!"});
-    };
-}
+    next();
+};
  

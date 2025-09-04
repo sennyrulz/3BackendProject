@@ -1,14 +1,19 @@
 import mongoose from 'mongoose';
 
 const kycSchema = new mongoose.Schema({
+  user: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
+  },
   phone: {
     type: String,
     required: true,
   },
   documentType: {
     type: String,
-    required: true,
     enum: ['passport', 'nin'],
+    required: true
   },
   idNumber: {
     type: String,
@@ -30,16 +35,37 @@ const kycSchema = new mongoose.Schema({
   occupation: {
     type: String,
     enum: [
-      'Self Employed',
-      'Employed',
-      'Govt Worker',
-      'Student',
-      'Expatriate',
-      'Politician',
-      'ClergyMan',
-      'Imam',
-      'Business',
+      'selfEmployed',
+      'employed',
+      'govtWorker',
+      'student',
+      'expatriate',
+      'politician',
+      'clergyman',
+      'imam',
+      'business',
+      'other',
     ],
+    required: true,
+  },
+  specifyOccupation: {
+    type: [String],
+  },
+  maritalStatus: {
+    type: String,
+    enum: ['Single', 'Married', 'Divorced', 'Widowed'],
+    required: true,
+  },
+  spouseName: {
+    type: String,
+  },
+  noOfChildren: {
+    type: Number,
+    default: 0,
+  },
+  religion: {
+    type: String,
+    enum: ['Christianity', 'Islam', 'Traditionalist', 'Other'],
     required: true,
   },
   companyName: {
@@ -47,7 +73,7 @@ const kycSchema = new mongoose.Schema({
     required: true,
   },
   companyAddress: {
-    type: String,
+    type: [String],
     required: true,
   },
   companyPhone: {
@@ -56,7 +82,6 @@ const kycSchema = new mongoose.Schema({
   },
   companyEmail: {
     type: String,
-    required: true,
   },
   currentHomeAddress: {
     type: String,
@@ -77,12 +102,7 @@ const kycSchema = new mongoose.Schema({
   zipCode: {
     type: String,
   },
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  
-  submittedAt: {
-    type: Date,
-    default: Date.now,
-  },
+    
 }, {timestamps: true}
 );
 

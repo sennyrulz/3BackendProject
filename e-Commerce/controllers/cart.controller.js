@@ -69,5 +69,11 @@ export const getCart = async (req, res) => {
   }
 };
 
+//========error page========//
+export const errorPage = async (req, res, next) => {
+    if (!addToCart, !getCart) {
+      return res.status(404)({message: "This page does not exist"})
+    }
+    next();
+};
 
-export default addToCart;

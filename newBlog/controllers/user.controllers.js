@@ -1,25 +1,33 @@
-import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import { streamUpload } from "../utils/streamUpload.js";
+import User from "../models/user.model.js";
+import bcrypt from "bcryptjs";
 
 // ================= Create User =================
-export const createUser = async (req, res) => {
- 
+export const createUser = async (req, res) => { 
   const { fullName, email, password } = req.body;
 
     if (!fullName || !email || !password) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
+      return res.status(400).json(
+        { success: false, message: "All fields are required" }
+      );
     }
 
+    // Check if user already exists in DB
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: "User already in use" });
-    }
+      return res.status(400).json({ success: false, message: "User already in exist!" });
+    };
+
+  // Continue with user creation
   try {
-    const newUser = new User({ fullName, email, password });
+    const newUser = new User({ 
+      fullName, 
+      email, 
+      password 
+    });
     const savedUser = await newUser.save();
-
     return res.status(savedUser);
-
   } catch (error) {
     console.log(error.message);
     return res.send("something went wrong");
@@ -30,17 +38,17 @@ export const createUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
+//validate user
   const user = await User.findOne({ email });
-
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
-
   };
 
-    const isMatch = bcrypt.compareSync(password, user.password);
-
-    if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
-
+  //compare password  
+  const isMatch = bcrypt.compareSync(password, user.password);
+  if (!isMatch) {
+    return res.status(400).json({ success: false, message: "Invalid credentials" });
+  }
     const token = jwt.sign(
       { id: user._id, admin: user.admin },
       process.env.JWT_SECRET, 
@@ -50,7 +58,7 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax"
     });
 
     return res.status(200).json({ success: true, message: "Login successful"});
@@ -60,23 +68,25 @@ export const loginUser = async (req, res) => {
 // ================= Get All Users =================
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
-    res.status(200).json({ success: true, count: users.length, users });
+    const getAllUsers = await User.find()
+    // .select("-password");
+    .populate("posts", "title desc, previewPix, img2, img3, img4, timestamps");
+    return res.status(200).json({ success: true, users: getAllUsers });
+  
   } catch (error) {
-        return res.send("something went wrong");
+    return res.send("error")
   }
 };
 
 // ================= Get Current User =================
-export const getOneUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select("-password");
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    res.status(200).json({ success: true, user });
-  } catch (error) {
-    return res.send("something went wrong");
-  }
-};
+export const getUser = async (req, res) => {
+  const { _id } = req.user;
+  const user = await userModel
+    .findById(_id)
+    .populate("kyc")
+    .populate("post")
+    return res.json(user);
+  };
 
 // ================= Update User =================
 export const updateUser = async (req, res) => {
@@ -119,12 +129,6 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-
-// ================== ERROR HANDLER (404) ==================
-export const errorPage = (req, res) => {
-  return res.status(404).json({ error: "This page does not exist" });
-};
-
 // ================== ARRAY UPLOAD ==================
 export const arrayUpload = async (req, res, next) => {
   try {
@@ -135,4 +139,13 @@ export const arrayUpload = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+// ================== ERROR HANDLER (404) ==================
+
+export const errorPage = async (req, res, next) => {
+    if (!createUser, !getUser, !updateUser, !deleteUser, !loginUser) {
+      return res.status(404)({message: "This page does not exist"})
+    }
+    next();
 };

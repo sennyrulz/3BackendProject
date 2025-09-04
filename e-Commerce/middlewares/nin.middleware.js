@@ -1,26 +1,37 @@
-// Do NOT import fakeVerifyNIN here
 // import fakeVerifyNIN from '../services/ninVerificationService.js';
 
+// Middleware to verify NIN before KYC submission
 export const verifyNINMiddleware = async (req, res, next) => {
-  const { documentType, idNumber } = req.body;
+  try {
+    const { documentType, idNumber } = req.body;
 
-  if (documentType !== 'nin') {
-    return next(); // Skip if it's not a NIN document
+    // Skip if it's not a NIN document
+    if (documentType !== "nin") {
+      return next();
+    }
+
+    // Check format (11 digits only)
+    const ninRegex = /^\d{11}$/;
+    if (!ninRegex.test(idNumber)) {
+      return res.status(400).json({ message: "Invalid NIN format. Must be 11 digits." });
+    }
+
+    // Fake verification service
+    const ninIsValid = await fakeVerifyNIN(idNumber);
+
+    // Automatically set status    
+    req.body.status = ninIsValid ? "approved" : "rejected";
+
+    return next();
+  } catch (error) {
+    console.error("NIN Middleware Error:", error);
+    return res.status(500).json({ message: "Error verifying NIN" });
   }
-
-  const ninRegex = /^\d{11}$/;
-  if (!ninRegex.test(idNumber)) {
-    return res.status(400).json({ message: 'Invalid NIN format' });
-  }
-
-  const ninIsValid = await fakeVerifyNIN(idNumber);
-
-  req.body.status = ninIsValid ? 'approved' : 'rejected';
-
-  return next();
 };
 
-// Just define it here (remove the import)
+// Mock NIN verification service (replace with real API later)
 const fakeVerifyNIN = async (nin) => {
-  return nin.startsWith('1');
+  // Example rule: approve if it starts with "959" (for testing)
+  return nin.startsWith("959");
 };
+

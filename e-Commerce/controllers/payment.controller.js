@@ -96,3 +96,11 @@ export const getAllPayments = async (req, res) => {
         return res.status(500).json({ message: "Error getting payments", error: error.message });
     }
 };
+
+//========error page========//
+export const errorPage = async (req, res, next) => {
+    if (!createPayment, !getPayment, !getAllPayments) {
+      return res.status(404)({message: "This page does not exist"})
+    }
+    next();
+};
