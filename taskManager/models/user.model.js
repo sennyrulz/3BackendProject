@@ -16,13 +16,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  tasks: [{type: mongoose.Types.ObjectId, ref: "Tasks"}],
+
 }, { timestamps: true });
 
 // Middleware to hash password before saving
 userSchema.pre('save', async function(next) {
-    const hashedPassword = bcrypt.hashSync(this.password, 10)
-    this.password = hashedPassword;
-    next();
+  const hashedPassword = bcrypt.hashSync(this.password, 10)
+  this.password = hashedPassword;
+  next();
 });
 
 const User = mongoose.model('User', userSchema);

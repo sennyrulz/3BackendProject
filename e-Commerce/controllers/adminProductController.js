@@ -5,27 +5,39 @@ import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 // ================= Create Product =================
 export const createProducts = async (req, res) => {
-  const { productName, desc, price, materials, features, categories, sizes } = req.body;
-  const { _id, Admin } = req.user;
+  try {
+  const { productName, desc, price, materials, features, category, sizes } = req.body;
+  const { _id } = req.admin;
   const files = req.files;
 
-  if (!productName || !desc || !price || !materials || !features || !categories || !sizes) {
+  if (!productName || !desc || !price || !materials || !features || !category || !sizes) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
-  if (!files?.previewPix || !files?.image1 || !files?.image2) {
-    return res.status(400).json({ message: 'Preview, image1, and image2 are required' });
+  if (!files?.previewPix || !files?.Img1 || !files?.Img2) {
+    return res.status(400).json({ message: 'PreviewPix, image1, and image2 are required' });
   }
 
-  try {
-    // Upload images
-    const previewPixResponse = await uploadToCloudinary(files["previewPix"][0].buffer);
-    const image1Response = await uploadToCloudinary(files["image1"][0].buffer);
-    const image2Response = await uploadToCloudinary(files["image2"][0].buffer);
+  // Upload images to coudinary using streamifier
+    const previewPixResponse = await uploadToCloudinary(files["previewPix"][0].buffer, "products");
+    const image1Response = await uploadToCloudinary(files["Img1"][0].buffer, "products");
+    const image2Response = await uploadToCloudinary(files["Img2"][0].buffer, "products");
+
+    // Convert features/sizes/categories to arrays
+    const featuresArray = features.split(',').map(f => f.trim());
+    const sizesArray = sizes.split(',').map(s => s.trim());
+    const categoryArray = category.split(',').map(c => c.trim());
 
     // Create product
     const newProduct = new Product({
       admin: _id,
+      productName,
+      desc,
+      price,
+      materials,
+      features: featuresArray,
+      category: categoryArray,
+      sizes,
       previewPix: {
         publicId: previewPixResponse.public_id,
         size: previewPixResponse.bytes,
@@ -42,14 +54,7 @@ export const createProducts = async (req, res) => {
           size: image2Response.bytes, 
           url: image2Response.secure_url 
         }
-      ],
-      productName,
-      desc,
-      price,
-      materials,
-      features,
-      categories,
-      sizes
+      ]
     });
 
     const savedProduct = await newProduct.save();
@@ -131,6 +136,7 @@ export const deleteProducts = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 // ================= Error Page =================
 export const errorPage = async (req, res, next) => {

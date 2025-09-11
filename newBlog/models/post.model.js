@@ -11,26 +11,64 @@ const postSchema = new mongoose.Schema({
         required: true
     },
     desc: {
-        type: [String]
+        type: String
+    },
+    category: {
+        type: [String],
+        enum: ["Technology", "Health", "Travel", "Food", "Lifestyle", "Education", "Finance", "Entertainment", "Sports", "Politics", "Science", "Business", "World", "Culture"],
+        default: ["Technology"],
+        required: true
     },
     previewPix: {
         publicId: String,
         size: Number
     },
+    Img1: [imageSchema],
     Img2: [imageSchema],
     Img3: [imageSchema],
-    Img4: [imageSchema],
+
+    // tags: [String],
+
+    // likeCount: {
+    //     type: Number,
+    //     default: 0
+    // },
+    // dislikeCount: {
+    //     type: Number,
+    //     default: 0
+    // },
+    // commentCount: {
+    //     type: Number,
+    //     default: 0
+    // },
+    // viewCount: {
+    //     type: Number,
+    //     default: 0
+    // },
+    // published: {
+    //     type: Boolean,
+    //     default: false
+    // },
+    // comment: {
+    //     type: String
+    // },
     
-    user: {type: mongoose.Types.ObjectId, ref: "User"},
-    admin: {type: mongoose.Types.ObjectId, ref: "Admin"}
+postedBy: {
+    id: { type: mongoose.Types.ObjectId, required: true, refPath: "postedBy.role" },
+    role: { 
+        type: String, 
+        required: true, 
+        enum: ["User", "Admin"] 
+    }
+}
 
 }, {timestamps: true});
 
 //mongoose middleware
-postSchema.pre("validate", function(next) {
-    console.log("something happened");
-    next();
-});
+// postSchema.pre("validate", function(next) {
+//     console.log("something happened");
+//     next();
+// });
 
 const Post = mongoose.model("Post", postSchema);
 export default Post

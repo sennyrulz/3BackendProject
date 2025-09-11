@@ -1,8 +1,28 @@
 import Task from '../models/task.model.js';
 
 export const createTask = async (req, res) => {
+  const {_id} = req.user;
+  const { title, description, status, dueDate } = req.body;
+
+  if (!title || !description || !dueDate) {
+    return res.status(400).json({ message: 'Title, description, and due date are required' });
+  };
+
   try {
-    const task = new Task(req.body);
+    const newTask = new Task({
+      user: _id,
+      title, 
+      description,
+      status,
+      dueDate,
+    });
+
+    // Populate user field with username and email
+    const task = await newTask
+    .populate({ 
+      path: 'user', 
+      select: 'username email'
+    })
     await task.save();
     res.status(201).json(task);
   } catch (error) {
@@ -11,10 +31,11 @@ export const createTask = async (req, res) => {
 };
 
 export const getTasks = async (req, res) => {
-    const {id} = req.user;
   try {
-    const tasks = await Task.find();
-    res.status(200).json(tasks);
+    const tasks = await Task
+    .find()
+    .populate("user", "username email");
+    return res.status(200).json(tasks);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

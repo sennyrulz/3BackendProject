@@ -4,7 +4,7 @@ import {
     createUser, loginUser, 
     getUser, updateUser, 
     deleteUser, errorPage
-} from '../../e-Commerce/controllers/user.controller.js';
+} from '../controllers/user.controllers.js';
 
 const route = express.Router();
 

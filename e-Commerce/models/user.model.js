@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -16,15 +17,15 @@ const userSchema = new mongoose.Schema({
     },
     
     kyc: { type: mongoose.Types.ObjectId, ref: "Kyc" },
-    product: { type: mongoose.Types.ObjectId, ref: "Product" },
-    checkout: { type: mongoose.Types.ObjectId, ref: "Checkout" },
-    payment: { type: mongoose.Types.ObjectId, ref: "Payment" },
-    cart: { type: mongoose.Types.ObjectId, ref: "Cart" },
+    products: [{ type: mongoose.Types.ObjectId, ref: "Product" }],    checkout: { type: mongoose.Types.ObjectId, ref: "Checkout" },
+    payments: [{ type: mongoose.Types.ObjectId, ref: "Payment" }],
+    carts: [{ type: mongoose.Types.ObjectId, ref: "Cart" }],
 
     admin: { 
         type: Boolean, 
         default: false 
     },
+    
 }, {timestamps: true}
 );
 
@@ -34,16 +35,16 @@ userSchema.pre("save", async function(next) {
     this.password = hashedPassword;
     next();
 });
-userSchema.pre("validate", function(next) {
-    console.log("something happened");
-    next();
-});
+// userSchema.pre("validate", function(next) {
+//     console.log("something happened");
+//     next();
+// });
 
-userSchema.post("save", function(doc, next) {
-    console.log(doc);
-    console.log("A verification email has been sent to your email");
-    next();
-});
+// userSchema.post("save", function(doc, next) {
+//     console.log(doc);
+//     console.log("A verification email has been sent to your email");
+//     next();
+// });
 
 const User = mongoose.model("User", userSchema);
 export default User

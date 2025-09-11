@@ -1,17 +1,27 @@
 import express from 'express'
 import {authenticateToken} from '../middlewares/auth.middlewares.js'
 import {createPost, getPost, updatePost, deletePost, errorPage} from "../controllers/post.controllers.js"
-import { arrayUpload } from '../controllers/user.controllers.js';
+import upload from '../utils/multer.js';
 
 const route = express.Router();
 
-//uploads
-route.post("/upload", arrayUpload, createPost);
+const postUploads = upload.fields([
+    {name: "previewPix", maxCount: 1},
+    {name: "Img1", maxCount: 1},
+    {name: "Img2", maxCount: 1},
+    {name: "Img3", maxCount: 1},
+])
 
-//posts
+//================= Product Routes =================
+// Create Product
+route.post("/upload",authenticateToken, postUploads, createPost);
+
+// Get Posts
 route.get("/", authenticateToken, getPost);
-route.put("/id", authenticateToken, updatePost)
-route.delete("/id", authenticateToken, deletePost)
+
+// Update and Delete Products
+route.put("/:id", authenticateToken, updatePost)
+route.delete("/:id", authenticateToken, deletePost)
 
 //Error
 route.get("/404", errorPage)

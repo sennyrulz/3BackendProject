@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const adminSchema = new mongoose.Schema({
-    name: {
+    fullName: {
         type: String,
         required: true
     },
@@ -14,6 +14,7 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    products: [{ type: mongoose.Types.ObjectId, ref: "Product" }],
     admin: { 
         type: Boolean, 
         default: true

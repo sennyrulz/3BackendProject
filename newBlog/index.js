@@ -15,8 +15,8 @@ const app = express();
 //Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URL)
-  .then(() => {console.log("✅ MongoDB connection successful");})
-  .catch((err) => console.log("❌ MongoDB connection error:"));
+  .then(() => {console.log("✅ MongoDB connection successful")})
+  .catch(() => console.log("❌ MongoDB connection error:"));
 
 // middleware
 app.use(express.json());
@@ -28,12 +28,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(cors({
-    origin: ["http://localhost:5007", "http://localhost:3000", "https://blog-project-frontend.vercel.app"],
-    credentials: true,
+  origin: ["http://localhost:5007", "https://blog-project-frontend.vercel.app"],
+  credentials: true,
   })
 );
 
-// routes or endpoints
+// Routes or endpoints
 app.use("/api/user", userRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/post", postRoute);

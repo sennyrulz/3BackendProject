@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { streamUpload } from "../utils/streamUpload.js";
+// import { streamUpload } from "../utils/streamUpload.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 
@@ -8,26 +8,26 @@ export const createUser = async (req, res) => {
   const { fullName, email, password } = req.body;
 
     if (!fullName || !email || !password) {
-      return res.status(400).json(
-        { success: false, message: "All fields are required" }
-      );
+      return res.status(400).json({ message: "All fields are required"});
     }
 
     // Check if user already exists in DB
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({email});
     if (existingUser) {
-      return res.status(400).json({ success: false, message: "User already in exist!" });
+      return res.status(400).json({ message: "User already in exist!"});
     };
 
-  // Continue with user creation
+  // Create a new user
   try {
     const newUser = new User({ 
       fullName, 
       email, 
       password 
     });
+
+  //Save user to DB
     const savedUser = await newUser.save();
-    return res.status(savedUser);
+    return res.json(savedUser);
   } catch (error) {
     console.log(error.message);
     return res.send("something went wrong");
@@ -61,7 +61,16 @@ export const loginUser = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax"
     });
 
-    return res.status(200).json({ success: true, message: "Login successful"});
+    return res.status(200).json({ 
+      success: true, 
+      message: "Login successful",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+
+      }
+    });
   };
 
 

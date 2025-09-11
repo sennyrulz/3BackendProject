@@ -19,9 +19,9 @@ export const authenticateToken = async (req, res, next) => {
     }
 
     req.user = {
-      id: user._id,
+      _id: user._id,
       email: user.email,
-      admin: user.admin, // if applicable
+      admin: user.admin || false,
     };
 
     next();

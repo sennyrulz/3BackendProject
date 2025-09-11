@@ -39,7 +39,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/tasks', taskRoutes);
-app.use('/users', userRoutes);
+app.use('/user', userRoutes);
 
 const PORT = process.env.PORT || 5009;
 

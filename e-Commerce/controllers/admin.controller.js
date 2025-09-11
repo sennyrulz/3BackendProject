@@ -1,7 +1,9 @@
-import Admin from '../models/admin.model.js';
 import jwt from 'jsonwebtoken';
+import Admin from '../models/admin.model.js';
 import bcrypt from 'bcryptjs';
 import { streamUpload } from "../utils/streamUpload.js"
+// http://localhost:5008/api/products/create
+
 
 // create a admin
 export const createAdmin = async (req, res ) => {
@@ -9,29 +11,29 @@ export const createAdmin = async (req, res ) => {
 
     if (!fullName || !email || !password) {
         return res.status(400).json({message: "invalid credentials"})
-    
-    //Create a new Admin
-    try {
-        const isAdmin = await Admin.findOne({email});
+    }
+
+    const isAdmin = await Admin.findOne({email});
         if(isAdmin) {
             return res.status(400).json({message:"Admin already exist. Please log in"})
         };
 
+    //Create a new admin
+        try {
             const newAdmin = new Admin({
                 fullName,
                 email,
                 password,
-                admin: true
+                // admin: true
             });
 
-        // Save the admin to the database
-            const savedAdmin = await newAdmin.save();
-            res.status(201).json(savedAdmin);
-    } catch (error) {
-        console.error("Error creating admin:", error);
-        return res.status(500).json({message:"something went wrong"});
+    // Save the admin to the database
+    const savedAdmin = await newAdmin.save();
+        res.status(201).json(savedAdmin);
+        } catch (error) {
+            console.error("Error creating admin:", error);
+            return res.status(500).json({message:"something went wrong"});
         }
-    }
 };
 
 //login admin
@@ -51,7 +53,7 @@ export const loginAdmin = async (req, res ) => {
 
     //create a token
     const token = jwt.sign(
-        { id:user._id, admin: true },
+        { id:admin._id, admin: true },
         process.env.JWT_SECRET,
         { expiresIn:"1h" }
     );
@@ -99,11 +101,10 @@ export const arrayUpload = async (req, res, next) => {
         }
 
         const uploads = await Promise.all(
-            req.files.map((file) => streamUpload(file.buffer, "images"))
+            req.files.map((file) => streamUpload(file.buffer, "Img"))
         );
 
-        req.uploads = uploads;
-        next()
+        return res.json ({ message: " Upload successful", uploads });
     } catch (error) {
         next(error)
     }

@@ -15,7 +15,8 @@ const userSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  post: [{type: mongoose.Types.ObjectId, ref: "Post"}],
+  posts: [{type: mongoose.Types.ObjectId, ref: "Post"}],
+  
   admin: {
     type: Boolean, 
     default: false
@@ -35,11 +36,11 @@ userSchema.pre("save", async function (next) {
 //   return await bcrypt.compare(candidatePassword, this.password);
 // };
 
-userSchema.post("save", function (doc, next) {
-  console.log("User saved:", doc);
-  console.log("A verification email has been sent to your email");
-  next();
-});
+// userSchema.post("save", function (next) {
+  // console.log("User saved:", doc);
+  // console.log("A verification email has been sent to your email");
+  // next();
+// });
 
 const User = mongoose.model("User", userSchema);
 

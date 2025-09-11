@@ -19,7 +19,7 @@ const app = express();
 // Connect to MongoDB
 mongoose 
   .connect(process.env.MONGO_URL)
-  .then(() => { console.log("✅ MongoDB connection successful")})
+  .then(() => {console.log("✅ MongoDB connection successful")})
   .catch(() => console.log("❌ MongoDB connection error:"));
 
 // Middleware
@@ -32,7 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(cors({
-  origin: ["http://localhost:5008", "https://backend-axia-8-eCommerce.onrender.com", "https://axia-8-eCommerce.onrender.com"],
+  origin: ["http://localhost:5008", "https://backend-axia-8-eCommerce.onrender.com"],
   credentials: true
 }));
 
@@ -48,7 +48,7 @@ app.use("/api/cart", cartRoute);
 // Server
 const PORT = process.env.PORT || 5008;
 app.listen(PORT, () => {
-  console.log(`app is running on ${PORT}`);
+  console.log(`🚀 Server is running on ${PORT}`);
 });
 
 // global error handler

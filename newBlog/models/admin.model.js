@@ -14,7 +14,8 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    post: [{ type: mongoose.Types.ObjectId, ref: "Post" }],
+    
+    posts: [{ type: mongoose.Types.ObjectId, ref: "Post" }],
 
     admin: {
         type: Boolean,

@@ -28,8 +28,8 @@ const productSchema = new mongoose.Schema({
 
     features: [String],
 
-    categrory: {
-        type: String,
+    category: {
+        type: [String],
         enum: ["Clothing", "Accessories", "Footwear", "Electronics", "Home Appliances"],
         required: true
     },
@@ -44,11 +44,12 @@ const productSchema = new mongoose.Schema({
         size: Number
     },
     
+    Img1: [imageSchema],
     Img2: [imageSchema],
-    Img3: [imageSchema],
 
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    admin: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
+    admin: { type: mongoose.Schema.Types.ObjectId, ref: "Admin", required: true },
+    inStock: { type: Boolean, default: true },
+    
 }, {timestamps: true}
 );
 
